@@ -6,7 +6,8 @@ import akka.stream.scaladsl._
 
 import math.{Pi, sin}
 import scala.collection.immutable.ArraySeq
-import scala.collection.mutable.ListBuffer
+
+import java.nio.file.Path
 
 
 object Symfonia {
@@ -28,6 +29,20 @@ object Symfonia {
 
   def init: Unit = {
     sinWavetable = computeSinWavetable
+  }
+
+  def dup( src: Source[Double, NotUsed] ) = src map (s => (s, s))
+
+}
+
+object Mixer {
+
+  def apply( srcs: Seq[Source[Double, NotUsed]] ) = {
+    val len = srcs.length
+
+    def mix( seq: Seq[Double] ) = seq map (_/len) sum
+
+    Source.zipWithN( mix )( srcs )
   }
 
 }
