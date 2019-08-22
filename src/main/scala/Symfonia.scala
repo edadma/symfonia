@@ -1,5 +1,6 @@
 package xyz.hyperreal.symfonia
 
+import akka.NotUsed
 import akka.stream._
 import akka.stream.scaladsl._
 
@@ -10,7 +11,7 @@ import scala.collection.mutable.ListBuffer
 
 object Symfonia {
 
-  private [symfonia] var _sps = 44100
+  private [symfonia] var _sps = 12//44100
 
   def sps = _sps
 
@@ -33,32 +34,39 @@ object Symfonia {
 
 object Oscillator {
 
-  def forWaveFunction(freq: Double, func: Int => Double ) = {
-    Source.fromIterator(
-      () =>
-        new Iterator[Double] {
-          var n = 0.0
+  def forWaveFunction( freq: Source[Double, NotUsed], func: Int => Double ) = {
+    Source.lazily( () => freq map {
+      new Function[Double, Double] {
+        var n = 0.0
 
-          val hasNext = true
+        def apply( f: Double ) = {
+          val v = func( n.toInt )
 
-          def next = {
-            val v = func( n.toInt )
-
-            n = (n + freq) % Symfonia._sps
-            v
-          }
+          n = (n + f) % Symfonia._sps
+          v
         }
-    )
+      }
+    } )
   }
 
-  def sinWave( freq: Double ) = forWaveFunction( freq, Symfonia.sinWavetable )
+  def sinWave( freq: Double ) = forWaveFunction( Source.repeat(freq), Symfonia.sinWavetable )
 
-  def pulseWave( freq: Double, duty: Double = .05 ) = forWaveFunction( freq, n => if (n < Symfonia._sps*duty) 1 else -1 )
+  def pulseWave( freq: Double, duty: Double ) = forWaveFunction( Source.repeat(freq), n => if (n < Symfonia._sps*duty) 1 else -1 )
 
   def squareWave( freq: Double ) = pulseWave( freq, .5 )
 
-  def sawWave( freq: Double ) = forWaveFunction( freq, n => n.toDouble/Symfonia._sps*2 - (if (n <= Symfonia._sps/2) 0 else 2) )
+  def sawWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => n.toDouble/Symfonia._sps*2 - (if (n <= Symfonia._sps/2) 0 else 2) )
 
-  def triangleWave( freq: Double ) = forWaveFunction( freq, n => if (n <= Symfonia._sps/4) n.toDouble/Symfonia._sps*4 else if (n <= Symfonia._sps*3/4) 1 - (n.toDouble/Symfonia._sps*4 - 1) else n.toDouble/Symfonia._sps*4 - 4 )
+  def triangleWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => if (n <= Symfonia._sps/4) n.toDouble/Symfonia._sps*4 else if (n <= Symfonia._sps*3/4) 1 - (n.toDouble/Symfonia._sps*4 - 1) else n.toDouble/Symfonia._sps*4 - 4 )
+
+  def sinWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, Symfonia.sinWavetable )
+
+  def pulseWave( freq: Source[Double, NotUsed], duty: Double ) = forWaveFunction( freq, n => if (n < Symfonia._sps*duty) 1 else -1 )
+
+  def squareWave( freq: Source[Double, NotUsed] ) = pulseWave( freq, .5 )
+
+  def sawWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => n.toDouble/Symfonia._sps*2 - (if (n <= Symfonia._sps/2) 0 else 2) )
+
+  def triangleWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => if (n <= Symfonia._sps/4) n.toDouble/Symfonia._sps*4 else if (n <= Symfonia._sps*3/4) 1 - (n.toDouble/Symfonia._sps*4 - 1) else n.toDouble/Symfonia._sps*4 - 4 )
 
 }

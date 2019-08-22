@@ -12,7 +12,7 @@ object Main extends App {
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
-  val source = Oscillator.triangleWave( 440 ).take( 21 )
+  val source = Oscillator.sinWave( 1 ).take( 5 )
   val result = source.runWith( Sink.seq )
 
   result.onComplete {
