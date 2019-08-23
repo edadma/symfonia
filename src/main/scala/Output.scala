@@ -1,21 +1,19 @@
 package xyz.hyperreal.symfonia
 
-import java.io.{ByteArrayInputStream, InputStream}
-import java.nio.file.{Files, Path}
-
-import akka.NotUsed
-import akka.stream.scaladsl.{Sink, Source, StreamConverters}
-import akka.util.ByteString
-import javax.sound.sampled.{AudioFileFormat, AudioFormat, AudioInputStream, AudioSystem}
+import java.io.ByteArrayInputStream
+import java.nio.file.Path
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 import scala.util.Success
 
+import akka.stream.scaladsl.{Sink, Source}
+import javax.sound.sampled.{AudioFileFormat, AudioFormat, AudioInputStream, AudioSystem}
+
 
 object Output {
 
-  def toMonoPCMInts( src: Source[Double, NotUsed] ) = src map (s => (s*32767).toInt)
+  def toMonoPCMInts( src: Source[Double, _] ) = src map (s => (s*32767).toInt)
 
   def toMonoPCMBytes( src: Source[Double, _] ) =
     src mapConcat {
@@ -25,7 +23,7 @@ object Output {
         List( (a >> 8) toByte, a toByte )
     }
 
-  def toMonoFile( src: Source[Double, _], file: Path ) = {
+  def toMonoWaveFile( src: Source[Double, _], file: Path ): Unit = {
     val future = toMonoPCMBytes( src ).runWith( Sink.seq )
 
     future.onComplete {
@@ -37,7 +35,7 @@ object Output {
         AudioSystem.write( stream, AudioFileFormat.Type.WAVE, file.toFile )
     }
 
-    Await.ready( future, 5.second )
+    Await.ready( future, Duration.Inf )
   }
 
 }

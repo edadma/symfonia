@@ -10,11 +10,15 @@ import akka.stream.scaladsl.Sink
 
 object Main extends App {
 
-//  implicit val system = ActorSystem( "Symfonia" )
-//  implicit val materializer = ActorMaterializer()
-//  implicit val ec = system.dispatcher
+  val fund = 220
+  val h1 = Oscillator.sinWave( fund )
+  val h2 = Shape.attenuate( Oscillator.sinWave(fund*3), 1.0/3 )
+  val h3 = Shape.attenuate( Oscillator.sinWave(fund*5), 1.0/5 )
+  val h4 = Shape.attenuate( Oscillator.sinWave(fund*7), 1.0/7 )
+  val h5 = Shape.attenuate( Oscillator.sinWave(fund*9), 1.0/9 )
+  val src = Shape.duration( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-  val source = Shape.duration( Oscillator.sinWave(440), 1 )
+//  val source = Shape.duration( Oscillator.sinWave(440), 0.01 )
 //  val result = source.runWith( Sink.seq )
 //
 //  result.onComplete {
@@ -23,7 +27,8 @@ object Main extends App {
 //      system.terminate
 //  }
 
-  Output.toMonoFile( source, Paths.get("tone.wav") )
+  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
+//  Scope( src )
   system.terminate
 
 }

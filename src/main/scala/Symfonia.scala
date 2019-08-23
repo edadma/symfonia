@@ -39,11 +39,21 @@ object Shape {
 
   def duration( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.sps).toLong
 
+  def attenuate( src: Source[Double, _], amplitude: Double ) = src map (_*amplitude)
+
 }
 
 object Mixer {
 
-  def apply( srcs: Seq[Source[Double, NotUsed]] ) = {
+  def apply( srcs: Seq[Source[Double, _]] ) = {
+    val len = srcs.length
+
+    def mix( seq: Seq[Double] ) = seq sum
+
+    Source.zipWithN( mix )( srcs )
+  }
+
+  def dampen( srcs: Seq[Source[Double, _]] ) = {
     val len = srcs.length
 
     def mix( seq: Seq[Double] ) = seq map (_/len) sum
