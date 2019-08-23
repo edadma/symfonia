@@ -5,6 +5,7 @@ import javax.sound.sampled.{AudioFormat, AudioSystem}
 import java.util.concurrent.locks.ReentrantLock
 
 import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 import scala.util.Success
 
 
@@ -108,17 +109,18 @@ object Player {
                 while (state == PAUSING)
                   Thread.`yield`
 
-                if (state == PLAYING)
-                  sink.pull.onComplete {
-                    case Success( None ) =>
+                if (state == PLAYING) {
+                  Await.result( sink.pull, Duration.Inf ) match {
+                    case None =>
                       line.drain
                       line.stop
-                    case Success( Some(block) ) =>
+                    case Some( block ) =>
                       val array = block.toArray
 
                       line.write( array, 0, array.length )
                       pull
                   }
+                }
               }
 
               while (state == INITIAL)
