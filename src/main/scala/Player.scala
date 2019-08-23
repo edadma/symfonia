@@ -41,49 +41,108 @@ object Player {
 
   }
 
-  def apply( src: Source[Double, _] ): PlayerControl = {
+//  def apply( src: Source[Double, _] ): PlayerControl = {
+//
+//    new PlayerControl {
+//      var playing = false
+//
+//      object playlock
+//
+//      val thread =
+//        new Thread {
+//          override def run = {
+//            val blocks = Output.toMonoPCMBytes( src ) grouped line.getBufferSize
+//
+//            open
+//            line.start
+//
+//            blocks runForeach {
+//              block =>
+//                val array = block.toArray
+//
+//                while (!playing)
+//                  Thread.`yield`
+//
+//                line.write( array, 0, array.length )
+//            }
+//
+//            line.drain
+//            line.stop
+//          }
+//        }
+//
+//      thread.start
+//
+//      def play: PlayerControl = {
+//        playing = true
+//        this
+//      }
+//
+//      def pause = playing = false
+//
+//      def join = thread.join
+//    }
+//
+//  }
 
-    new PlayerControl {
-      var playing = false
+    def apply( src: Source[Double, _] ): PlayerControl = {
 
-      object playlock
+      new PlayerControl {
+        abstract class PlayerState
+        case object INITIAL extends PlayerState
+        case object PLAYING extends PlayerState
+        case object PAUSING extends PlayerState
+        case object STOPPED extends PlayerState
 
-      val thread =
-        new Thread {
-          override def run = {
-            val blocks = Output.toMonoPCMBytes( src ) grouped line.getBufferSize
+        var state: PlayerState = INITIAL
 
-            open
-            line.start
+        val thread =
+          new Thread {
+            override def run = {
+              val sink = Output.toMonoPCMBytes( src ) grouped line.getBufferSize runWith Sink.queue[Seq[Byte]]
 
-            blocks runForeach {
-              block =>
-                val array = block.toArray
+              open
+              line.start
 
-                while (!playing)
+              def pull: Unit = {
+                while (state == PAUSING)
                   Thread.`yield`
 
-                line.write( array, 0, array.length )
-            }
+                if (state == PLAYING)
+                  sink.pull.onComplete {
+                    case Success( None ) =>
+                      line.drain
+                      line.stop
+                    case Success( Some(block) ) =>
+                      val array = block.toArray
 
-            line.drain
-            line.stop
+                      line.write( array, 0, array.length )
+                      pull
+                  }
+              }
+
+              while (state == INITIAL)
+                Thread.`yield`
+
+              pull
+            }
           }
+
+        thread.start
+
+        def play: PlayerControl = {
+          state = PLAYING
+          this
         }
 
-      thread.start
+        def pause = state = PAUSING
 
-      def play: PlayerControl = {
-        playing = true
-        this
+        def stop = state = STOPPED
+
+        def join = thread.join
       }
 
-      def pause = playing = false
-
-      def join = thread.join
     }
-
-  }
 
 }
 

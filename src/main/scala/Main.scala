@@ -34,6 +34,7 @@ object Main extends App {
   val p = Player( Shape.length(Oscillator.sinWave(440), 1) )
 
   p.play.join
+
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
   system.terminate
