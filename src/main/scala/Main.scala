@@ -31,7 +31,7 @@ object Main extends App {
 //      system.terminate
 //  }
 
-  Player( Shape.length(h1, 1) )
+  Player( Shape.length(Oscillator.sinWave(440), 1) )
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
   system.terminate

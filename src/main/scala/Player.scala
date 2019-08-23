@@ -29,6 +29,7 @@ object Player {
 
           line.drain
           line.stop
+          line.close
         }
       }
 
