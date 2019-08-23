@@ -8,6 +8,8 @@ import akka.stream.scaladsl.{Sink, Source, StreamConverters}
 import akka.util.ByteString
 import javax.sound.sampled.{AudioFileFormat, AudioFormat, AudioInputStream, AudioSystem}
 
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import scala.util.Success
 
 
@@ -35,6 +37,7 @@ object Output {
         AudioSystem.write( stream, AudioFileFormat.Type.WAVE, file.toFile )
     }
 
+    Await.ready( future, 5.second )
   }
 
 }
