@@ -12,7 +12,7 @@ import java.nio.file.Path
 
 object Symfonia {
 
-  private [symfonia] var _sps = 12//44100
+  private [symfonia] var _sps = 44100
 
   def sps = _sps
 
@@ -32,6 +32,12 @@ object Symfonia {
   }
 
   def dup( src: Source[Double, NotUsed] ) = src map (s => (s, s))
+
+}
+
+object Shape {
+
+  def duration( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.sps).toLong
 
 }
 

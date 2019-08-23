@@ -1,5 +1,7 @@
 package xyz.hyperreal.symfonia
 
+import java.nio.file.Paths
+
 import akka.actor.ActorSystem
 import akka.actor.Status.Success
 import akka.stream.ActorMaterializer
@@ -12,13 +14,16 @@ object Main extends App {
 //  implicit val materializer = ActorMaterializer()
 //  implicit val ec = system.dispatcher
 
-  val source = Oscillator.sinWave( 1 ).take( 5 )
-  val result = source.runWith( Sink.seq )
+  val source = Shape.duration( Oscillator.sinWave(440), 1 )
+//  val result = source.runWith( Sink.seq )
+//
+//  result.onComplete {
+//    case scala.util.Success( s ) =>
+//      println( s map ("%.2f" format _) )
+//      system.terminate
+//  }
 
-  result.onComplete {
-    case scala.util.Success( s ) =>
-      println( s map ("%.2f" format _) )
-      system.terminate
-  }
+  Output.toMonoFile( source, Paths.get("tone.wav") )
+  system.terminate
 
 }
