@@ -37,9 +37,9 @@ object Symfonia {
 
 object Shape {
 
-  def duration( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.sps).toLong
+  def length(src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.sps).toLong
 
-  def attenuate( src: Source[Double, _], amplitude: Double ) = src map (_*amplitude)
+  def amplitude(src: Source[Double, _], amplitude: Double ) = src map (_*amplitude)
 
 }
 

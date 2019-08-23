@@ -12,11 +12,15 @@ object Main extends App {
 
   val fund = 220
   val h1 = Oscillator.sinWave( fund )
-  val h2 = Shape.attenuate( Oscillator.sinWave(fund*3), 1.0/3 )
-  val h3 = Shape.attenuate( Oscillator.sinWave(fund*5), 1.0/5 )
-  val h4 = Shape.attenuate( Oscillator.sinWave(fund*7), 1.0/7 )
-  val h5 = Shape.attenuate( Oscillator.sinWave(fund*9), 1.0/9 )
-  val src = Shape.duration( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
+  val h2 = Shape.amplitude( Oscillator.sinWave(fund*3), 1.0/3 )
+  val h3 = Shape.amplitude( Oscillator.sinWave(fund*5), 1.0/5 )
+  val h4 = Shape.amplitude( Oscillator.sinWave(fund*7), 1.0/7 )
+  val h5 = Shape.amplitude( Oscillator.sinWave(fund*9), 1.0/9 )
+  val src = Shape.length( h1, 1 ) concat
+    Shape.length( Mixer( List(h1, h2) ), 1 ) concat
+    Shape.length( Mixer( List(h1, h2, h3) ), 1 ) concat
+    Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
+    Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
 //  val source = Shape.duration( Oscillator.sinWave(440), 0.01 )
 //  val result = source.runWith( Sink.seq )
