@@ -22,18 +22,7 @@ object Main extends App {
     Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
     Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-//  val source = Shape.duration( Oscillator.sinWave(440), 0.01 )
-//  val result = source.runWith( Sink.seq )
-//
-//  result.onComplete {
-//    case scala.util.Success( s ) =>
-//      println( s map ("%.2f" format _) )
-//      system.terminate
-//  }
-
-  val p = Player( Shape.length(Oscillator.sinWave(440), 1) )
-
-  p.play.join
+  Player( Shape.length(Oscillator.sinWave(440), 1) ).play.join
 
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
