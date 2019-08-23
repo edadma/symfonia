@@ -95,7 +95,13 @@ object Player {
         case object PAUSING extends PlayerState
         case object STOPPED extends PlayerState
 
-        var state: PlayerState = INITIAL
+        var _state: PlayerState = INITIAL
+
+        object statesync
+
+        def state = statesync synchronized( _state )
+
+        def state_=( newstate: PlayerState ) = statesync synchronized {_state = newstate }
 
         val thread =
           new Thread {
