@@ -12,10 +12,10 @@ object Main extends App {
 
   val fund = 220
   val h1 = Oscillator.sinWave( fund )
-  val h2 = Shape.amplitude( Oscillator.sinWave(fund*3), 1.0/3 )
-  val h3 = Shape.amplitude( Oscillator.sinWave(fund*5), 1.0/5 )
-  val h4 = Shape.amplitude( Oscillator.sinWave(fund*7), 1.0/7 )
-  val h5 = Shape.amplitude( Oscillator.sinWave(fund*9), 1.0/9 )
+  val h2 = Shape.amplitude( Oscillator.sinWave(fund*3), 1/3d )
+  val h3 = Shape.amplitude( Oscillator.sinWave(fund*5), 1/5d )
+  val h4 = Shape.amplitude( Oscillator.sinWave(fund*7), 1/7d )
+  val h5 = Shape.amplitude( Oscillator.sinWave(fund*9), 1/9d )
   val src = Shape.length( h1, 1 ) concat
     Shape.length( Mixer( List(h1, h2) ), 1 ) concat
     Shape.length( Mixer( List(h1, h2, h3) ), 1 ) concat
@@ -31,7 +31,8 @@ object Main extends App {
 //      system.terminate
 //  }
 
-  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
+  Player( Shape.length(h1, 1) )
+//  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
   system.terminate
 
