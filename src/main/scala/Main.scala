@@ -8,9 +8,9 @@ import akka.stream.scaladsl.Sink
 
 object Main extends App {
 
-  implicit val system = ActorSystem( "Symfonia" )
-  implicit val materializer = ActorMaterializer()
-  implicit val ec = system.dispatcher
+//  implicit val system = ActorSystem( "Symfonia" )
+//  implicit val materializer = ActorMaterializer()
+//  implicit val ec = system.dispatcher
 
   val source = Oscillator.sinWave( 1 ).take( 5 )
   val result = source.runWith( Sink.seq )

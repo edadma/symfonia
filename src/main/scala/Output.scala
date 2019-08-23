@@ -1,9 +1,14 @@
 package xyz.hyperreal.symfonia
 
+import java.io.{ByteArrayInputStream, InputStream}
 import java.nio.file.Path
 
 import akka.NotUsed
-import akka.stream.scaladsl.{Source, StreamConverters}
+import akka.stream.scaladsl.{Sink, Source, StreamConverters}
+import akka.util.ByteString
+import javax.sound.sampled.{AudioFileFormat, AudioFormat, AudioInputStream}
+
+import scala.util.Success
 
 
 object Output {
@@ -19,7 +24,16 @@ object Output {
     }
 
   def toMonoFile( src: Source[Double, NotUsed], file: Path ) = {
-    toMonoPCMBytes( src ).runWith( StreamConverters.asInputStream() )
+    val future = toMonoPCMBytes( src ).runWith( Sink.seq ) // StreamConverters.asInputStream()
+
+    future.onComplete {
+      case Success( seq ) =>
+        val array = seq.toArray
+        val format = new AudioFormat( Symfonia._sps, 16, 1, true, true )
+        val stream = new AudioInputStream( new ByteArrayInputStream(array), format, array.length )
+    }
+
+//    AudioFileFormat.Type.WAVE,
   }
 
 }
