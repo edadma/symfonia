@@ -5,7 +5,7 @@ import java.nio.file.Paths
 import akka.actor.ActorSystem
 import akka.actor.Status.Success
 import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.Sink
+import akka.stream.scaladsl.{Sink, Source}
 
 
 object Main extends App {
@@ -31,7 +31,9 @@ object Main extends App {
 //      system.terminate
 //  }
 
-  Player( Shape.length(Oscillator.sinWave(440), 1) )
+  val p = Player( Shape.length(Oscillator.sinWave(440), 1) )
+
+  p.play.join
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
   system.terminate

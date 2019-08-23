@@ -1,11 +1,11 @@
 package xyz.hyperreal.symfonia
 
 import akka.stream.scaladsl.{Sink, Source}
-
 import javax.sound.sampled.{AudioFormat, AudioSystem}
 import java.util.concurrent.locks.ReentrantLock
 
 import scala.concurrent.Await
+import scala.util.Success
 
 
 object Player {
@@ -27,9 +27,16 @@ object Player {
   def init = {
 
     if (opened) {
-      format = new AudioFormat( Symfonia.sps, 16, 1, true, true )
-      line = AudioSystem.getSourceDataLine( format )
-      line.open( format )
+      if (format != null && format.getFrameRate.toInt != Symfonia.rate) {
+        line.close
+        format = null
+      }
+
+      if (format eq null) {
+        format = new AudioFormat( Symfonia.rate, 16, 1, true, true )
+        line = AudioSystem.getSourceDataLine( format )
+        line.open( format )
+      }
     }
 
   }
@@ -53,26 +60,21 @@ object Player {
               block =>
                 val array = block.toArray
 
-                if (!playing)
-                  playlock.wait
+                while (!playing)
+                  Thread.`yield`
 
                 line.write( array, 0, array.length )
             }
 
             line.drain
             line.stop
-            close
           }
         }
 
       thread.start
 
       def play: PlayerControl = {
-        if (!playing) {
-          playing = true
-          playlock.notify
-        }
-
+        playing = true
         this
       }
 

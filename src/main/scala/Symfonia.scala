@@ -12,18 +12,18 @@ import java.nio.file.Path
 
 object Symfonia {
 
-  private [symfonia] var _sps = 44100
+  private [symfonia] var sps = 44100
 
-  def sps = _sps
+  def rate = sps
 
-  def sps_=( n: Int ): Unit = {
+  def rate_=( n: Int ): Unit = {
     require( 8000 <= n && n <= 96000, s"samples per second is out of range: $n" )
 
-    _sps = n
+    sps = n
     init
   }
 
-  private def computeSinWavetable = ArraySeq( (for (i <- 0 until _sps) yield sin( 2*Pi/_sps*i )): _* )
+  private def computeSinWavetable = ArraySeq( (for (i <- 0 until sps) yield sin( 2*Pi/sps*i )): _* )
 
   private [symfonia] var sinWavetable = computeSinWavetable
 
@@ -34,13 +34,29 @@ object Symfonia {
 
   def dup( src: Source[Double, NotUsed] ) = src map (s => (s, s))
 
+  def function( f: Double => Double ) =
+    Source.fromIterator( () => new Iterator[Double] {
+      var t = 0d
+
+      val hasNext = true
+
+      def next = {
+        val v = f( t )
+
+        t += 1d/Symfonia.rate
+        v
+      }
+    } )
+
 }
 
 object Shape {
 
-  def length(src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.sps).toLong
+  def length( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.rate).toLong
 
-  def amplitude(src: Source[Double, _], amplitude: Double ) = src map (_*amplitude)
+  def amplitude( src: Source[Double, _], amplitude: Double ) = src map (_*amplitude)
+
+  def fade( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.rate).toLong
 
 }
 
@@ -74,7 +90,7 @@ object Oscillator {
         def apply( f: Double ) = {
           val v = func( n.toInt )
 
-          n = (n + f) % Symfonia._sps
+          n = (n + f) % Symfonia.sps
           v
         }
       }
@@ -83,22 +99,22 @@ object Oscillator {
 
   def sinWave( freq: Double ) = forWaveFunction( Source.repeat(freq), Symfonia.sinWavetable )
 
-  def pulseWave( freq: Double, duty: Double ) = forWaveFunction( Source.repeat(freq), n => if (n < Symfonia._sps*duty) 1 else -1 )
+  def pulseWave( freq: Double, duty: Double ) = forWaveFunction( Source.repeat(freq), n => if (n < Symfonia.sps*duty) 1 else -1 )
 
   def squareWave( freq: Double ) = pulseWave( freq, .5 )
 
-  def sawWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => n.toDouble/Symfonia._sps*2 - (if (n <= Symfonia._sps/2) 0 else 2) )
+  def sawWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => n.toDouble/Symfonia.sps*2 - (if (n <= Symfonia.sps/2) 0 else 2) )
 
-  def triangleWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => if (n <= Symfonia._sps/4) n.toDouble/Symfonia._sps*4 else if (n <= Symfonia._sps*3/4) 1 - (n.toDouble/Symfonia._sps*4 - 1) else n.toDouble/Symfonia._sps*4 - 4 )
+  def triangleWave( freq: Double ) = forWaveFunction( Source.repeat(freq), n => if (n <= Symfonia.sps/4) n.toDouble/Symfonia.sps*4 else if (n <= Symfonia.sps*3/4) 1 - (n.toDouble/Symfonia.sps*4 - 1) else n.toDouble/Symfonia.sps*4 - 4 )
 
   def sinWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, Symfonia.sinWavetable )
 
-  def pulseWave( freq: Source[Double, NotUsed], duty: Double ) = forWaveFunction( freq, n => if (n < Symfonia._sps*duty) 1 else -1 )
+  def pulseWave( freq: Source[Double, NotUsed], duty: Double ) = forWaveFunction( freq, n => if (n < Symfonia.sps*duty) 1 else -1 )
 
   def squareWave( freq: Source[Double, NotUsed] ) = pulseWave( freq, .5 )
 
-  def sawWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => n.toDouble/Symfonia._sps*2 - (if (n <= Symfonia._sps/2) 0 else 2) )
+  def sawWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => n.toDouble/Symfonia.sps*2 - (if (n <= Symfonia.sps/2) 0 else 2) )
 
-  def triangleWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => if (n <= Symfonia._sps/4) n.toDouble/Symfonia._sps*4 else if (n <= Symfonia._sps*3/4) 1 - (n.toDouble/Symfonia._sps*4 - 1) else n.toDouble/Symfonia._sps*4 - 4 )
+  def triangleWave( freq: Source[Double, NotUsed] ) = forWaveFunction( freq, n => if (n <= Symfonia.sps/4) n.toDouble/Symfonia.sps*4 else if (n <= Symfonia.sps*3/4) 1 - (n.toDouble/Symfonia.sps*4 - 1) else n.toDouble/Symfonia.sps*4 - 4 )
 
 }

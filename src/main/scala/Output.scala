@@ -29,7 +29,7 @@ object Output {
     future.onComplete {
       case Success( seq ) =>
         val array = seq.toArray
-        val format = new AudioFormat( Symfonia._sps, 16, 1, true, true )
+        val format = new AudioFormat( Symfonia.sps, 16, 1, true, true )
         val stream = new AudioInputStream( new ByteArrayInputStream(array), format, array.length )
 
         AudioSystem.write( stream, AudioFileFormat.Type.WAVE, file.toFile )
