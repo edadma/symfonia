@@ -29,6 +29,7 @@ object Symfonia {
 
   def init: Unit = {
     sinWavetable = computeSinWavetable
+    Player.init
   }
 
   def dup( src: Source[Double, NotUsed] ) = src map (s => (s, s))

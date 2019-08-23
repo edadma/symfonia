@@ -1,40 +1,85 @@
 package xyz.hyperreal.symfonia
 
 import akka.stream.scaladsl.{Sink, Source}
+
 import javax.sound.sampled.{AudioFormat, AudioSystem}
+import java.util.concurrent.locks.ReentrantLock
 
 import scala.concurrent.Await
 
 
 object Player {
 
-  def apply( src: Source[Double, _] ) = {
+  var format: AudioFormat = _
+  var line = AudioSystem.getSourceDataLine( format )
+  var opened = false
 
-    val thread =
-      new Thread {
-        override def run = {
-          val format = new AudioFormat( Symfonia.sps, 16, 1, true, true )
-          val line = AudioSystem.getSourceDataLine( format )
-          val blocks = Output.toMonoPCMBytes( src ) grouped line.getBufferSize
+  def open = {
+    opened = true
+    init
+  }
 
-          line.open( format )
-          line.start
+  def close = {
+    line.close
+    opened = false
+  }
 
-          blocks runForeach {
-            block =>
-              val array = block.toArray
+  def init = {
 
-              line.write( array, 0, array.length )
+    if (opened) {
+      format = new AudioFormat( Symfonia.sps, 16, 1, true, true )
+      line = AudioSystem.getSourceDataLine( format )
+      line.open( format )
+    }
+
+  }
+
+  def apply( src: Source[Double, _] ): PlayerControl = {
+
+    new PlayerControl {
+      var playing = false
+
+      object playlock
+
+      val thread =
+        new Thread {
+          override def run = {
+            val blocks = Output.toMonoPCMBytes( src ) grouped line.getBufferSize
+
+            open
+            line.start
+
+            blocks runForeach {
+              block =>
+                val array = block.toArray
+
+                if (!playing)
+                  playlock.wait
+
+                line.write( array, 0, array.length )
+            }
+
+            line.drain
+            line.stop
+            close
           }
-
-          line.drain
-          line.stop
-          line.close
         }
+
+      thread.start
+
+      def play: PlayerControl = {
+        if (!playing) {
+          playing = true
+          playlock.notify
+        }
+
+        this
       }
 
-    thread.start
-    thread.join
+      def pause = playing = false
+
+      def join = thread.join
+    }
 
   }
 
@@ -42,6 +87,8 @@ object Player {
 
 trait PlayerControl {
 
+  def play: PlayerControl
 
+  def join: Unit
 
 }
