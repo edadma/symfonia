@@ -68,22 +68,25 @@ object Player {
             line.start
 
             def pull: Unit = {
-              while (state == PAUSING)
-                Thread.`yield`
+              state match {
+                case PAUSING =>
+                  Thread.`yield`
+                  pull
+                case PLAYING =>
+                  Await.result( sink.pull, Duration.Inf ) match {
+                    case None =>
+                      line.drain
+                      line.stop
+                    case Some( block ) =>
+                      val array = block.toArray
 
-              if (state == PLAYING) {
-                Await.result( sink.pull, Duration.Inf ) match {
-                  case None =>
-                    line.drain
-                    line.stop
-                  case Some( block ) =>
-                    val array = block.toArray
-
-                    line.write( array, 0, array.length )
-                    pull
-                }
-              } else
-                sink.cancel
+                      line.write( array, 0, array.length )
+                      pull
+                  }
+                case STOPPED =>
+                  sink.cancel
+                  line.stop
+              }
             }
 
             while (state == INITIAL)
