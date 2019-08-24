@@ -8,18 +8,18 @@ object Music {
 
   val octave =
     ArraySeq(
-      Set( "C" ),
-      Set( "C#", "Db"),
-      Set( "D" ),
-      Set( "D#", "Eb" ),
-      Set( "E" ),
-      Set( "F" ),
-      Set( "F#", "Gb" ),
-      Set( "G" ),
-      Set( "G#", "Ab" ),
-      Set( "A" ),
-      Set( "A#", "Bb" ),
-      Set( "B" )
+      Seq( "C" ),
+      Seq( "C#", "Db"),
+      Seq( "D" ),
+      Seq( "D#", "Eb" ),
+      Seq( "E" ),
+      Seq( "F" ),
+      Seq( "F#", "Gb" ),
+      Seq( "G" ),
+      Seq( "G#", "Ab" ),
+      Seq( "A" ),
+      Seq( "A#", "Bb" ),
+      Seq( "B" )
     )
 
   val notes =
@@ -29,4 +29,4 @@ object Music {
     notes flatMap (n => n.names map (name => ((name, n.octave) -> n)))
 }
 
-case class Note( n: Int, names: Set[String], octave: Int, note: Int, freq: Double, typ: Int )
+case class Note( n: Int, names: Seq[String], octave: Int, note: Int, freq: Double, typ: Int )

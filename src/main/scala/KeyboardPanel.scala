@@ -33,8 +33,8 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
     path moveTo (x, y)
     path lineTo (x + widthWhite, y)
     path lineTo (x + widthWhite, y + heightWhite)
-    path.lineTo (x, y + heightWhite)
-    path lineTo (x, y)
+    path lineTo (x, y + heightWhite)
+    path.closePath
     path
   }
 
@@ -44,33 +44,77 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
     path moveTo (x, y)
     path lineTo (x + widthBlack, y)
     path lineTo (x + widthBlack, y + heightBlack)
-    path.lineTo (x, y + heightBlack)
-    path lineTo (x, y)
+    path lineTo (x, y + heightBlack)
+    path.closePath
     path
   }
 
-  def pathCE( x: Int, y: Int ) = {
+  def pathCF( x: Int, y: Int ) = {
     val path = new Path2D.Double
 
     path moveTo (x, y)
     path lineTo (x + widthWhite - widthBlack/2 - shift - spacing, y)
-    path lineTo (x + widthWhite - widthBlack/2 - shift - spacing, y + heightBlack)
-    path lineTo (x + widthWhite, y + heightBlack)
+    path lineTo (x + widthWhite - widthBlack/2 - shift - spacing, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightWhite)
+    path lineTo (x, y + heightWhite)
+    path.closePath
+    path
+  }
+
+  def pathD( x: Int, y: Int ) = {
+    val path = new Path2D.Double
+
+    path moveTo (x + widthBlack/2 - shift + spacing, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightBlack + spacing)
     path lineTo (x + widthWhite, y + heightWhite)
     path.lineTo (x, y + heightWhite)
-    path lineTo (x, y)
+    path lineTo (x, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2 - shift + spacing, y + heightBlack + spacing)
+    path.closePath
+    path
+  }
+
+  def pathEB( x: Int, y: Int ) = {
+    val path = new Path2D.Double
+
+    path moveTo (x + widthBlack/2 + shift + spacing, y)
+    path lineTo (x + widthWhite, y)
+    path lineTo (x + widthWhite, y + heightWhite)
+    path.lineTo (x, y + heightWhite)
+    path lineTo (x, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2 + shift + spacing, y + heightBlack + spacing)
+    path.closePath
     path
   }
 
   val keyPaths = {
-    Seq( pathCE( 0, 0 ) )
-//    var x = 0
-//    var prev: Note = _
-//
-//    for (n <- startNote to endNote)
-//      yield {
-//
-//      }
+    var x = 0
+    var prev: Note = null
+
+    for (n <- startNote to endNote)
+      yield {
+        val v =
+          Music.notes(n).names.head match {
+            case "C" => pathCF( x, 0 )
+            case "C#"|"D#"|"F#"|"G#"|"A#" => pathBlack( x, 0 )
+            case "D" => pathD( x, 0 )
+            case "E" => pathEB( x, 0 )
+            case "F" => pathPlain( x, 0 )
+            case "G" => pathPlain( x, 0 )
+            case "A" => pathPlain( x, 0 )
+            case "B" => pathEB( x, 0 )
+          }
+
+        if (Music.notes(n).typ == 1)
+          x += widthWhite + spacing
+        else
+          x += widthBlack + spacing
+
+        v
+      }
   }
 
   var keyhover = false
@@ -153,8 +197,10 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
         g setColor CYAN
       else if (keypress && key == k)
         g setColor GREEN
+      else if (Music.notes(k + startNote).typ == 1)
+        g setColor WHITE
       else
-       g setColor WHITE
+        g setColor DARK_GRAY
 
       g fill p
     }
