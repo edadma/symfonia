@@ -82,7 +82,8 @@ object Player {
                     line.write( array, 0, array.length )
                     pull
                 }
-              }
+              } else
+                sink.cancel
             }
 
             while (state == INITIAL)
