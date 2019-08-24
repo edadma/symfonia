@@ -65,14 +65,44 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
   def pathD( x: Int, y: Int ) = {
     val path = new Path2D.Double
 
-    path moveTo (x + widthBlack/2 - shift + spacing, y)
+    path moveTo (x + widthBlack/2 - shift, y)
     path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y)
     path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y + heightBlack + spacing)
     path lineTo (x + widthWhite, y + heightBlack + spacing)
     path lineTo (x + widthWhite, y + heightWhite)
     path.lineTo (x, y + heightWhite)
     path lineTo (x, y + heightBlack + spacing)
-    path lineTo (x + widthBlack/2 - shift + spacing, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2 - shift, y + heightBlack + spacing)
+    path.closePath
+    path
+  }
+
+  def pathA( x: Int, y: Int ) = {
+    val path = new Path2D.Double
+
+    path moveTo (x + widthBlack/2, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightWhite)
+    path.lineTo (x, y + heightWhite)
+    path lineTo (x, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2, y + heightBlack + spacing)
+    path.closePath
+    path
+  }
+
+  def pathG( x: Int, y: Int ) = {
+    val path = new Path2D.Double
+
+    path moveTo (x + widthBlack/2 - shift, y)
+    path lineTo (x + widthWhite - widthBlack/2 - spacing, y)
+    path lineTo (x + widthWhite - widthBlack/2 - spacing, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightWhite)
+    path.lineTo (x, y + heightWhite)
+    path lineTo (x, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2 - shift, y + heightBlack + spacing)
     path.closePath
     path
   }
@@ -80,12 +110,12 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
   def pathEB( x: Int, y: Int ) = {
     val path = new Path2D.Double
 
-    path moveTo (x + widthBlack/2 + shift + spacing, y)
+    path moveTo (x + widthBlack/2 + shift, y)
     path lineTo (x + widthWhite, y)
     path lineTo (x + widthWhite, y + heightWhite)
     path.lineTo (x, y + heightWhite)
     path lineTo (x, y + heightBlack + spacing)
-    path lineTo (x + widthBlack/2 + shift + spacing, y + heightBlack + spacing)
+    path lineTo (x + widthBlack/2 + shift, y + heightBlack + spacing)
     path.closePath
     path
   }
@@ -99,19 +129,19 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
         val v =
           Music.notes(n).names.head match {
             case "C" => pathCF( x, 0 )
-            case "C#"|"D#"|"F#"|"G#"|"A#" => pathBlack( x, 0 )
+            case "C#"|"F#" => pathBlack( x - spacing - widthBlack/2 - shift, 0 )
+            case "A#"|"D#" => pathBlack( x - spacing - widthBlack/2 + shift, 0 )
+            case "G#" => pathBlack( x - spacing - widthBlack/2, 0 )
             case "D" => pathD( x, 0 )
             case "E" => pathEB( x, 0 )
-            case "F" => pathPlain( x, 0 )
-            case "G" => pathPlain( x, 0 )
-            case "A" => pathPlain( x, 0 )
+            case "F" => pathCF( x, 0 )
+            case "G" => pathG( x, 0 )
+            case "A" => pathA( x, 0 )
             case "B" => pathEB( x, 0 )
           }
 
         if (Music.notes(n).typ == 1)
           x += widthWhite + spacing
-        else
-          x += widthBlack + spacing
 
         v
       }
