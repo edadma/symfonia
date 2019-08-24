@@ -3,25 +3,17 @@ package xyz.hyperreal.symfonia
 import java.awt.Color._
 import java.awt.geom.Path2D
 
-import scala.swing.{Graphics2D, MainFrame, Panel}
+import scala.swing.{Graphics2D, Panel}
 import scala.swing.Swing._
-import scala.swing.event.{MouseEntered, MouseExited, MouseMoved, MousePressed, MouseReleased}
+import scala.swing.event.{MouseExited, MouseMoved, MousePressed, MouseReleased}
 
 
 class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int ) extends Panel {
 
   require( Music.notes(startNote).typ == 1 && Music.notes(endNote).typ == 1 )
 
-  val width = {
-    (for (i <- startNote to endNote)
-      yield {
-        val note = Music.notes(i)
-
-        if (note.typ == 1)
-          widthWhite
-        else
-          widthBlack
-      }).sum + (endNote - startNote)*spacing}
+  val nat = for (i <- startNote to endNote if Music.notes(i).typ == 1) yield widthWhite
+  val width = nat.sum + (nat.length - 1)*spacing
 
   preferredSize = (width, heightWhite)
   background = BLACK
