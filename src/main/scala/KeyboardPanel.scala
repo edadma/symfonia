@@ -11,6 +11,7 @@ import scala.swing.event.{MouseExited, MouseMoved, MousePressed, MouseReleased}
 class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int ) extends Panel {
 
   require( Music.notes(startNote).typ == 1 && Music.notes(endNote).typ == 1 )
+  require( Music.notes(startNote).names.head == "A" || Music.notes(startNote).names.head == "C")
 
   val nat = for (i <- startNote to endNote if Music.notes(i).typ == 1) yield widthWhite
   val width = nat.sum + (nat.length - 1)*spacing
@@ -84,6 +85,19 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
     path
   }
 
+  def pathAStart( x: Int, y: Int ) = {
+    val path = new Path2D.Double
+
+    path moveTo (x, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y)
+    path lineTo (x + widthWhite - widthBlack/2 + shift - spacing, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightBlack + spacing)
+    path lineTo (x + widthWhite, y + heightWhite)
+    path lineTo (x, y + heightWhite)
+    path.closePath
+    path
+  }
+
   def pathG( x: Int, y: Int ) = {
     val path = new Path2D.Double
 
@@ -128,7 +142,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
             case "E" => pathEB( x, 0 )
             case "F" => pathCF( x, 0 )
             case "G" => pathG( x, 0 )
-            case "A" => pathA( x, 0 )
+            case "A" => if (n == startNote) pathAStart( x, 0 ) else pathA( x, 0 )
             case "B" => pathEB( x, 0 )
           }
 
