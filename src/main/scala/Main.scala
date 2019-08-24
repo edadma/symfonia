@@ -7,6 +7,8 @@ import akka.actor.Status.Success
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 
+import scala.swing.MainFrame
+
 
 object Main extends App {
 
@@ -22,10 +24,19 @@ object Main extends App {
     Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
     Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-  Player( Shape.length(Oscillator.sinWave(440), 1) ).play.join
+//  Player( Shape.length(Oscillator.sinWave(440), 1) ).play.join
 
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
+
+  new MainFrame {
+    contents = new KeyboardPanel( 69, 81, 40, 120, 20, 80, 5, 2 )
+    centerOnScreen
+    pack
+    resizable = false
+    open
+  }
+
   system.terminate
 
 }
