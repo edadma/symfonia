@@ -8,7 +8,15 @@ import scala.swing.Swing._
 import scala.swing.event.{MouseExited, MouseMoved, MousePressed, MouseReleased}
 
 
-class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int ) extends Panel {
+object Keyboard {
+
+  def basic24( press: Int => Unit, release: Int => Unit ) =
+    new KeyboardPanel( 48, 71, 40, 120, 20, 72, 5, 2, press, release )
+
+}
+
+class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int,
+                     press: Int => Unit, release: Int => Unit ) extends Panel {
 
   require( Music.notes(startNote).typ == 1 && Music.notes(endNote).typ == 1 )
   require( Music.notes(startNote).names.head == "A" || Music.notes(startNote).names.head == "C")
@@ -196,6 +204,9 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
             keypress = true
             key = k
             repaint
+
+            if (press ne null)
+              press( k )
           }
 
           within = true
@@ -216,6 +227,9 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
           key = k
           within = true
           repaint
+
+          if (release ne null)
+            release( k )
         }
 
       if (!within) {
@@ -223,6 +237,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
         keyhover = false
         keypress = false
       }
+
   }
 
   override def paintComponent( g: Graphics2D ): Unit = {
