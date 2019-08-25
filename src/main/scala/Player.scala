@@ -40,7 +40,7 @@ object Player {
 
       def state = statesync synchronized( _state )
 
-      def state_=( newstate: PlayerState ) = statesync synchronized {_state = newstate }
+      def state_=( newstate: PlayerState ) = statesync synchronized { _state = newstate }
 
       val thread =
         new Thread {
