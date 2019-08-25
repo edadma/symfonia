@@ -12,31 +12,38 @@ import scala.swing.MainFrame
 
 object Main extends App {
 
-  val fund = 220
-  val h1 = Oscillator.sinWave( fund )
-  val h2 = Shape.amplitude( Oscillator.sinWave(fund*3), 1/3d )
-  val h3 = Shape.amplitude( Oscillator.sinWave(fund*5), 1/5d )
-  val h4 = Shape.amplitude( Oscillator.sinWave(fund*7), 1/7d )
-  val h5 = Shape.amplitude( Oscillator.sinWave(fund*9), 1/9d )
-  val src = Shape.length( h1, 1 ) concat
-    Shape.length( Mixer( List(h1, h2) ), 1 ) concat
-    Shape.length( Mixer( List(h1, h2, h3) ), 1 ) concat
-    Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
-    Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
+//  val fund = 220
+//  val h1 = Oscillator.sinWave( fund )
+//  val h2 = Shape.amplitude( Oscillator.sinWave(fund*3), 1/3d )
+//  val h3 = Shape.amplitude( Oscillator.sinWave(fund*5), 1/5d )
+//  val h4 = Shape.amplitude( Oscillator.sinWave(fund*7), 1/7d )
+//  val h5 = Shape.amplitude( Oscillator.sinWave(fund*9), 1/9d )
+//  val src = Shape.length( h1, 1 ) concat
+//    Shape.length( Mixer( List(h1, h2) ), 1 ) concat
+//    Shape.length( Mixer( List(h1, h2, h3) ), 1 ) concat
+//    Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
+//    Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-//  Player( Shape.length(Oscillator.sinWave(440), 1) ).play.join
+//  val (hub, src) = Hub.keepAlive
+//
+//  hub plug Sound.beep( 440 )
 
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
-  def tone( )
+  def press( k: Int ) = {
+    println( k )
+  }
+
   new MainFrame {
-    contents = Keyboard.basic24( println, println )
+    contents = Keyboard.basic24( press, println )
     centerOnScreen
     pack
     resizable = false
     open
   }
+
+//  Player( src ).play.join
 
   system.terminate
 

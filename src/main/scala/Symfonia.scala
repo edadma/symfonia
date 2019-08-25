@@ -50,6 +50,12 @@ object Symfonia {
 
 }
 
+object Sound {
+
+  def beep( freq: Double ) = Shape.length( Oscillator.sinWave(freq), .5 )
+
+}
+
 object Shape {
 
   def length( src: Source[Double, _], sec: Double ) = src take (sec*Symfonia.rate).toLong
