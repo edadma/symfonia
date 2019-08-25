@@ -29,6 +29,7 @@ object Main extends App {
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
+  def tone( )
   new MainFrame {
     contents = Keyboard.basic24( println, println )
     centerOnScreen

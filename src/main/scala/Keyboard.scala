@@ -169,9 +169,14 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
 
   reactions += {
     case MouseExited( _, _, _) =>
-      if (keyhover || keypress) {
-        keyhover = false
+      if (keypress) {
         keypress = false
+        repaint
+        release( key )
+      }
+
+      if (keyhover) {
+        keyhover = false
         repaint
       }
     case MouseMoved( _, p, _ ) =>
@@ -222,14 +227,14 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
 
       for (k <- keyPaths.indices)
         if (keyPaths(k).contains( p )) {
+          if ((release ne null) && keypress)
+            release( key )
+
           keyhover = true
           keypress = false
           key = k
           within = true
           repaint
-
-          if (release ne null)
-            release( k )
         }
 
       if (!within) {
