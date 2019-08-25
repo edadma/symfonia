@@ -24,25 +24,23 @@ object Main extends App {
 //    Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
 //    Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-  val (hub, src) = Hub.keepAlive
-
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
   def press( n: Note ) = {
-    hub plug Sound.beep( 440 )
+//    hub plug Sound.beep( 440 )
     println( n )
   }
 
   new MainFrame {
-    contents = Keyboard.basic24( press, println )
+    contents = Keyboard.basic13( press, println )
     centerOnScreen
     pack
     resizable = false
     open
   }
 
-  Player( src ).play.join
+  //Player( Sound.beep( 440 ) ).play.join
 
   system.terminate
 

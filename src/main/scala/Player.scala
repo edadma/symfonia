@@ -11,36 +11,16 @@ import scala.util.Success
 
 object Player {
 
-  var format: AudioFormat = _
-  var line = AudioSystem.getSourceDataLine( format )
-  var opened = false
-
   def open = {
-    opened = true
-    init
+    val format = new AudioFormat( Symfonia.rate, 16, 1, true, true )
+    val line = AudioSystem.getSourceDataLine( format )
+
+    line.open( format )
+    line
   }
 
-  def close = {
-    line.close
-    opened = false
-  }
-
-  def init = {
-
-    if (opened) {
-      if (format != null && format.getFrameRate.toInt != Symfonia.rate) {
-        line.close
-        format = null
-      }
-
-      if (format eq null) {
-        format = new AudioFormat( Symfonia.rate, 16, 1, true, true )
-        line = AudioSystem.getSourceDataLine( format )
-        line.open( format )
-      }
-    }
-
-  }
+//  def close = {
+//  }
 
   def apply( src: Source[Double, _] ): PlayerControl = {
 
@@ -62,9 +42,9 @@ object Player {
       val thread =
         new Thread {
           override def run = {
+            val line = open
             val sink = Output.toMonoPCMBytes( src ) grouped line.getBufferSize runWith Sink.queue[Seq[Byte]]
 
-            open
             line.start
 
             def pull: Unit = {

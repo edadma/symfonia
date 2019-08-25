@@ -10,12 +10,19 @@ import scala.swing.event.{MouseExited, MouseMoved, MousePressed, MouseReleased}
 
 object Keyboard {
 
-  def basic24( press: Note => Unit, release: Note => Unit ) =
-    new KeyboardPanel( 48, 71, 40, 120, 20, 72, 5, 2, press, release )
+  def basic25( press: Note => Unit, release: Note => Unit ) =
+    new KeyboardPanel( 48, 72, 40, 120, 20, 72, 5, 2, true, press, release )
+
+  def basic13( press: Note => Unit, release: Note => Unit ) =
+    new KeyboardPanel( 60, 72, 40, 120, 20, 72, 5, 2, true, press, release )
+
+  def standard( press: Note => Unit, release: Note => Unit ) =
+    new KeyboardPanel( 21, 108, 20, 60, 10, 36, 2, 1, false, press, release )
+
 
 }
 
-class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int,
+class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int, markMiddleC: Boolean,
                      press: Note => Unit, release: Note => Unit ) extends Panel {
 
   require( Music.notes(startNote).typ == 1 && Music.notes(endNote).typ == 1 )
@@ -249,10 +256,14 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
     super.paintComponent( g )
 
     for ((p, k) <- keyPaths.zipWithIndex) {
+      val note = Music.notes(k + startNote)
+
       if (keyhover && key == k)
         g setColor CYAN
       else if (keypress && key == k)
         g setColor GREEN
+      else if (markMiddleC && note.names.head == "C" && note.octave == 4)
+        g setColor LIGHT_GRAY
       else if (Music.notes(k + startNote).typ == 1)
         g setColor WHITE
       else
