@@ -30,7 +30,7 @@ object Main extends App {
 //  Scope( src )
 
   new MainFrame {
-    contents = new KeyboardPanel( 69, 83, 40, 120, 20, 72, 5, 2 )
+    contents = new KeyboardPanel( 48, 71, 40, 120, 20, 72, 5, 2 )
     centerOnScreen
     pack
     resizable = false

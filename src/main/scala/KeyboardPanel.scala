@@ -20,7 +20,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
   background = BLACK
   foreground = WHITE
 
-  def pathPlain( x: Int, y: Int ) = {
+  def pathCEnd( x: Int, y: Int ) = {
     val path = new Path2D.Double
 
     path moveTo (x, y)
@@ -134,7 +134,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
       yield {
         val v =
           Music.notes(n).names.head match {
-            case "C" => pathCF( x, 0 )
+            case "C" => if (n == endNote) pathCEnd( x, 0 ) else pathCF( x, 0 )
             case "C#"|"F#" => pathBlack( x - spacing - widthBlack/2 - shift, 0 )
             case "A#"|"D#" => pathBlack( x - spacing - widthBlack/2 + shift, 0 )
             case "G#" => pathBlack( x - spacing - widthBlack/2, 0 )

@@ -23,7 +23,7 @@ object Music {
     )
 
   val notes =
-    ArraySeq( (for (i <- 0 to 127) yield Note( i, octave(i%12), i/12 - 1, i%12, 440*pow(2, (i - 69)/12d), octave(i%12).size )): _* )
+    ArraySeq( (for (i <- 0 to 150) yield Note( i, octave(i%12), i/12 - 1, i%12, 440*pow(2, (i - 69)/12d), octave(i%12).size )): _* )
 
   val noteMap =
     notes flatMap (n => n.names map (name => ((name, n.octave) -> n)))
