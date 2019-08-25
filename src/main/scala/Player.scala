@@ -1,7 +1,7 @@
 package xyz.hyperreal.symfonia
 
 import akka.stream.scaladsl.{Sink, Source}
-import javax.sound.sampled.{AudioFormat, AudioSystem}
+import javax.sound.sampled.{AudioFormat, AudioSystem, SourceDataLine}
 import java.util.concurrent.locks.ReentrantLock
 
 import scala.concurrent.Await
@@ -16,11 +16,14 @@ object Player {
     val line = AudioSystem.getSourceDataLine( format )
 
     line.open( format )
+    line.start
     line
   }
 
-//  def close = {
-//  }
+  def close( line: SourceDataLine ) = {
+    line.stop
+    line.close
+  }
 
   def apply( src: Source[Double, _] ): PlayerControl = {
 
@@ -45,8 +48,6 @@ object Player {
             val line = open
             val sink = Output.toMonoPCMBytes( src ) grouped line.getBufferSize runWith Sink.queue[Seq[Byte]]
 
-            line.start
-
             def pull: Unit = {
               state match {
                 case PAUSING =>
@@ -56,7 +57,6 @@ object Player {
                   Await.result( sink.pull, Duration.Inf ) match {
                     case None =>
                       line.drain
-                      line.stop
                     case Some( block ) =>
                       val array = block.toArray
 
@@ -65,7 +65,6 @@ object Player {
                   }
                 case STOPPED =>
                   sink.cancel
-                  line.stop
               }
             }
 
@@ -73,6 +72,7 @@ object Player {
               Thread.`yield`
 
             pull
+            close( line )
           }
         }
 

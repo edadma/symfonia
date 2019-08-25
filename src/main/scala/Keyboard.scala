@@ -19,7 +19,6 @@ object Keyboard {
   def standard( press: Note => Unit, release: Note => Unit ) =
     new KeyboardPanel( 21, 108, 20, 60, 10, 36, 2, 1, false, press, release )
 
-
 }
 
 class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int, markMiddleC: Boolean,

@@ -28,7 +28,7 @@ object Main extends App {
 //  Scope( src )
 
   def press( n: Note ) = {
-//    hub plug Sound.beep( 440 )
+    Player( Sound.beep( n.freq ) ).play
     println( n )
   }
 
@@ -38,10 +38,11 @@ object Main extends App {
     pack
     resizable = false
     open
+
+    override def closeOperation = {
+      system.terminate
+      sys.exit
+    }
   }
-
-  //Player( Sound.beep( 440 ) ).play.join
-
-  system.terminate
 
 }
