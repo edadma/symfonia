@@ -10,13 +10,13 @@ import scala.swing.event.{MouseExited, MouseMoved, MousePressed, MouseReleased}
 
 object Keyboard {
 
-  def basic24( press: Int => Unit, release: Int => Unit ) =
+  def basic24( press: Note => Unit, release: Note => Unit ) =
     new KeyboardPanel( 48, 71, 40, 120, 20, 72, 5, 2, press, release )
 
 }
 
 class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite: Int, widthBlack: Int, heightBlack: Int, shift: Int, spacing: Int,
-                     press: Int => Unit, release: Int => Unit ) extends Panel {
+                     press: Note => Unit, release: Note => Unit ) extends Panel {
 
   require( Music.notes(startNote).typ == 1 && Music.notes(endNote).typ == 1 )
   require( Music.notes(startNote).names.head == "A" || Music.notes(startNote).names.head == "C")
@@ -172,7 +172,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
       if (keypress) {
         keypress = false
         repaint
-        release( key )
+        release( Music.notes(key + startNote) )
       }
 
       if (keyhover) {
@@ -211,7 +211,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
             repaint
 
             if (press ne null)
-              press( k )
+              press( Music.notes(k + startNote) )
           }
 
           within = true
@@ -228,7 +228,7 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
       for (k <- keyPaths.indices)
         if (keyPaths(k).contains( p )) {
           if ((release ne null) && keypress)
-            release( key )
+            release( Music.notes(key + startNote) )
 
           keyhover = true
           keypress = false

@@ -24,15 +24,14 @@ object Main extends App {
 //    Shape.length( Mixer( List(h1, h2, h3, h4) ), 1 ) concat
 //    Shape.length( Mixer( List(h1, h2, h3, h4, h5) ), 1 )
 
-//  val (hub, src) = Hub.keepAlive
-//
-//  hub plug Sound.beep( 440 )
+  val (hub, src) = Hub.keepAlive
 
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
-  def press( k: Int ) = {
-    println( k )
+  def press( n: Note ) = {
+    hub plug Sound.beep( 440 )
+    println( n )
   }
 
   new MainFrame {
@@ -43,7 +42,7 @@ object Main extends App {
     open
   }
 
-//  Player( src ).play.join
+  Player( src ).play.join
 
   system.terminate
 
