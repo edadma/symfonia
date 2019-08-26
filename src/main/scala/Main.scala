@@ -7,6 +7,7 @@ import akka.actor.Status.Success
 import akka.stream.ActorMaterializer
 import akka.stream.scaladsl.{Sink, Source}
 
+import scala.concurrent.duration._
 import scala.swing.MainFrame
 
 
@@ -27,13 +28,16 @@ object Main extends App {
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
+  val (hub, src) = Hub.keepAlive
+
   def press( n: Note ) = {
-    Player( Sound.beep( n.freq ) ).play
     println( n )
+    hub plug Sound.beep( n.freq ).throttle( Symfonia.rate/20, .05 seconds )
+    println( "sent" )
   }
 
   new MainFrame {
-    contents = Keyboard.basic13( press, println )
+    contents = Keyboard.basic13( press, null )
     centerOnScreen
     pack
     resizable = false
@@ -41,8 +45,12 @@ object Main extends App {
 
     override def closeOperation = {
       system.terminate
-      sys.exit
+      sys.exit()
     }
   }
+
+  Player( src ).play
+
+  //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
 
 }

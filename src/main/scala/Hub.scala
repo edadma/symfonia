@@ -31,8 +31,32 @@ object Hub {
       }
     }
 
+  private def iterator1( hub: Hub ) =
+    new Iterator[Double] {
+      var prev: Option[Double] = _
+
+      def hasNext = {
+        if (prev eq null)
+          do {
+            prev = hub.pull
+          } while (prev isEmpty)
+
+        prev nonEmpty
+      }
+
+      def next = {
+        if (hasNext) {
+          val res = prev.get
+
+          prev = null
+          res
+        } else
+          throw new NoSuchElementException( "hub empty" )
+      }
+    }
+
   def basic = {
-    val hub = new Hub( false )
+    val hub = new Hub
 
     (hub, Source.fromIterator( () => iterator(hub) ))
   }
@@ -49,14 +73,14 @@ object Hub {
 //  }
 
   def keepAlive = {
-    val hub = new Hub( true )
+    val hub = new Hub
 
-    (hub, Source.fromIterator( () => iterator(hub) ))
+    (hub, Source.fromIterator( () => iterator1(hub) ))
   }
 
 }
 
-class Hub( keepAlive: Boolean) {
+class Hub {
 
   private val inputs = new ArrayBuffer[SinkQueueWithCancel[Double]]
   private var cancelled = false
@@ -84,7 +108,7 @@ class Hub( keepAlive: Boolean) {
 
     clean
 
-    if (cancelled || (buf.isEmpty && !keepAlive))
+    if (cancelled || buf.isEmpty)
       None
     else
       Some( buf map (_.get) sum )

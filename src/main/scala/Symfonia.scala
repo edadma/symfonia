@@ -49,7 +49,7 @@ object Symfonia {
 
 object Sound {
 
-  def beep( freq: Double ) = Shape.length( Oscillator.sinWave(freq), .5 )
+  def beep( freq: Double ) = Shape.length( Oscillator.sinWave(freq), 2 )
 
 }
 

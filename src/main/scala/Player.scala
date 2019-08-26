@@ -2,11 +2,9 @@ package xyz.hyperreal.symfonia
 
 import akka.stream.scaladsl.{Sink, Source}
 import javax.sound.sampled.{AudioFormat, AudioSystem, SourceDataLine}
-import java.util.concurrent.locks.ReentrantLock
 
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
-import scala.util.Success
 
 
 object Player {
