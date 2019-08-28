@@ -61,6 +61,9 @@ libraryDependencies ++= {
 //}
 
 libraryDependencies ++= Seq(
+  "org.jaudiolibs" % "audioservers-api" % "1.2.0",
+  "org.jaudiolibs" % "audioservers-javasound" % "1.2.0",
+  "org.jaudiolibs" % "audioservers-jack" % "1.2.0"
 )
 
 coverageExcludedPackages := ".*Main"

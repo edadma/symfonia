@@ -49,7 +49,7 @@ object Main extends App {
     }
   }
 
-  Player( src ).play
+  JavaSoundPlayer( src ).play
 
   //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
 
