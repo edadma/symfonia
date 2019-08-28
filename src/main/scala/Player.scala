@@ -19,6 +19,49 @@ import org.jaudiolibs.audioservers.ext.Connections
 
 object Player {
 
+  class PlayerClient extends AudioClient {
+    val loader = ServiceLoader.load(classOf[AudioServerProvider])
 
+    def findProvider: Option[AudioServerProvider] = {
+      for (p <- loader.iterator.asScala) {
+        if (p.getLibraryName == "JACK")
+          return Some( p )
+      }
+
+      None
+    }
+
+    val provider =
+      findProvider match {
+        case Some( p ) => p
+        case None => sys.error( "jack not found" )
+      }
+
+    val config = new AudioConfiguration(
+      44100.0f, //sample rate
+      0, // input channels
+      2, // output channels
+      256, //buffer size
+      // extensions
+      new ClientID("Symfonia"),
+      Connections.OUTPUT)
+
+
+    /* Use the AudioServerProvider to create an AudioServer for the client.
+     */
+    val server = provider.createServer(config, this)
+
+    def configure( context: AudioConfiguration ): Unit = {
+
+    }
+
+    def process( time: Long, inputs: java.util.List[FloatBuffer], outputs: java.util.List[FloatBuffer], nframes: Int ) = {
+
+    }
+
+    def shutdown = {
+
+    }
+  }
 
 }
