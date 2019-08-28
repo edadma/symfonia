@@ -53,6 +53,21 @@ object Player {
       Connections.OUTPUT)
 
     val server = provider.createServer( config, this )
+
+    val runner = new Thread( new Runnable {
+      def run = {
+        try {
+          server.run
+        } catch {
+          case ex: Exception =>
+            Logger.getLogger(this.getClass.getName).log(Level.SEVERE, null, ex)
+        }
+      }
+    } )
+
+    runner.setPriority(Thread.MAX_PRIORITY)
+    runner.start
+
     var buffer: Array[Float] = _
 
     def configure( context: AudioConfiguration ): Unit = {
