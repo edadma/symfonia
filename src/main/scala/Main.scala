@@ -28,11 +28,11 @@ object Main extends App {
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
-  val (hub, src) = Hub.keepAlive
+//  val (hub, src) = Hub.keepAlive
 
   def press( n: Note ) = {
     println( n )
-    hub plug Sound.beep( n.freq ).throttle( Symfonia.rate/20, .05 seconds )
+    Player( Sound.beep( n.freq ) )
     println( "sent" )
   }
 
@@ -48,8 +48,6 @@ object Main extends App {
       sys.exit()
     }
   }
-
-  Player( src )
 
   //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
 
