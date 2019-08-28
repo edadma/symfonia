@@ -45,7 +45,7 @@ object Player {
   }
 
   class PlayerClient( src: Source[Double, _] ) extends AudioClient {
-    val sink = src map (_.toFloat) grouped 1024 buffer (2, OverflowStrategy.backpressure) runWith Sink.queue[Seq[Float]]
+    val sink = src map (_.toFloat) grouped 1024 buffer (1, OverflowStrategy.backpressure) runWith Sink.queue[Seq[Float]]
     val data = new mutable.Queue[Float]( 1024 )
     val config = new AudioConfiguration(
       44100.0f, //sample rate
@@ -73,6 +73,8 @@ object Player {
     runner.start
 
     var buffer: Array[Float] = _
+
+    def join = runner.join
 
     def configure( context: AudioConfiguration ): Unit = {
       if (context.getOutputChannelCount != 2)

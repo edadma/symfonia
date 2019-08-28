@@ -1,11 +1,6 @@
 package xyz.hyperreal.symfonia
 
-import java.nio.file.Paths
-
-import akka.actor.ActorSystem
-import akka.actor.Status.Success
-import akka.stream.ActorMaterializer
-import akka.stream.scaladsl.{Sink, Source}
+import akka.stream.scaladsl.Source
 
 import scala.concurrent.duration._
 import scala.swing.MainFrame
@@ -28,11 +23,11 @@ object Main extends App {
 //  Output.toMonoWaveFile( src, Paths.get("tone.wav") )
 //  Scope( src )
 
-//  val (hub, src) = Hub.keepAlive
+  val (hub, src) = Hub.keepAlive
 
   def press( n: Note ) = {
     println( n )
-    Player( Sound.beep( n.freq ) )
+    hub plug Sound.beep( n.freq )
     println( "sent" )
   }
 
@@ -45,9 +40,14 @@ object Main extends App {
 
     override def closeOperation = {
       system.terminate
-      sys.exit()
+      sys.exit
     }
   }
+
+  hub plug Source.repeat( 0d )
+  Player( src )
+//  Player( Shape.length( Oscillator.sinWave(440), 6 ).throttle( 44100, 1 second ) ).join
+//  system.terminate
 
   //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
 
