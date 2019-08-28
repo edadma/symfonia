@@ -5,6 +5,8 @@ import java.util.ServiceLoader
 import java.util.logging.Level
 import java.util.logging.Logger
 
+import akka.stream.OverflowStrategy
+
 import scala.jdk.CollectionConverters._
 import akka.stream.scaladsl.{Sink, Source}
 import org.jaudiolibs.audioservers.AudioClient
@@ -13,6 +15,7 @@ import org.jaudiolibs.audioservers.AudioServerProvider
 import org.jaudiolibs.audioservers.ext.ClientID
 import org.jaudiolibs.audioservers.ext.Connections
 
+import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 
@@ -42,7 +45,8 @@ object Player {
   }
 
   class PlayerClient( src: Source[Double, _] ) extends AudioClient {
-    val sink = src map (_.toFloat) runWith Sink.queue[Float]
+    val sink = src map (_.toFloat) grouped 1024 buffer (2, OverflowStrategy.backpressure) runWith Sink.queue[Seq[Float]]
+    val data = new mutable.Queue[Float]( 1024 )
     val config = new AudioConfiguration(
       44100.0f, //sample rate
       0, // input channels
@@ -77,7 +81,10 @@ object Player {
 
     var done = false
 
-    def process( time: Long, inputs: java.util.List[FloatBuffer], outputs: java.util.List[FloatBuffer], nframes: Int ) = {
+    def process( time: Long, inputs: java.util.List[FloatBuffer], outputs: java.util.List[FloatBuffer], nframes: Int ): Boolean = {
+      if (done)
+        return false
+
       val left = outputs.get(0)
       val right = outputs.get(1)
 
@@ -85,18 +92,22 @@ object Player {
         buffer = new Array[Float]( nframes )
       }
 
-      for (i <- 0 until nframes) {
-        if (done)
-          buffer(i) = 0
-        else
-          Await.result( sink.pull, Duration.Inf ) match {
-            case Some( s ) =>
-              buffer(i) = s
-            case None =>
-              done = true
-              buffer(i) = 0
-          }
-      }
+      val dequeued = data.length min nframes
+
+      for (i <- 0 until dequeued)
+        buffer(i) = data.dequeue
+
+      if (dequeued < nframes)
+        Await.result( sink.pull, Duration.Inf ) match {
+          case Some( s ) =>
+            for (i <- dequeued until nframes)
+              buffer(i) = s(i - dequeued)
+
+            for (i <- nframes - dequeued until s.length)
+              data enqueue s(i)
+          case None =>
+            done = true
+        }
 
       left.put(buffer)
       right.put(buffer)
