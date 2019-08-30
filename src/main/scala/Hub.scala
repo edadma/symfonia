@@ -94,7 +94,7 @@ class Hub {
   }
 
   private def pull = synchronized {
-    val buf = Await.result( Future.sequence( inputs map (_.pull) ), Duration.Inf )
+    val buf = Await.result( Future.sequence(inputs map (_.pull)), Duration.Inf )
 
     def clean: Unit = {
       buf indexOf None match {

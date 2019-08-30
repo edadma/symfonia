@@ -211,13 +211,13 @@ class KeyboardPanel( startNote: Int, endNote: Int, widthWhite: Int, heightWhite:
       for (k <- keyPaths.indices)
         if (keyPaths(k).contains( p )) {
           if (!keypress || key != k) {
+            if (press ne null)
+              press( Music.notes(k + startNote) )
+
             keyhover = false
             keypress = true
             key = k
             repaint
-
-            if (press ne null)
-              press( Music.notes(k + startNote) )
           }
 
           within = true
