@@ -4,6 +4,7 @@ import java.nio.FloatBuffer
 import java.util.ServiceLoader
 import java.util.logging.Level
 import java.util.logging.Logger
+import java.util.{List => JList}
 
 import akka.stream.OverflowStrategy
 
@@ -69,7 +70,7 @@ object Player {
       }
     } )
 
-    runner.setPriority(Thread.MAX_PRIORITY)
+    runner.setPriority( Thread.MAX_PRIORITY )
     runner.start
 
     var buffer: Array[Float] = _
@@ -83,7 +84,7 @@ object Player {
 
     var done = false
 
-    def process( time: Long, inputs: java.util.List[FloatBuffer], outputs: java.util.List[FloatBuffer], nframes: Int ): Boolean = {
+    def process( time: Long, inputs: JList[FloatBuffer], outputs: JList[FloatBuffer], nframes: Int ): Boolean = {
       if (done)
         return false
 

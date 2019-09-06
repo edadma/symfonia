@@ -23,13 +23,6 @@ libraryDependencies ++= Seq(
 	"org.scala-lang.modules" %% "scala-swing" % "2.1.1"
 )
 
-libraryDependencies ++= {
-  val akkaV = "2.5.25"
-  Seq(
-    "com.typesafe.akka" %% "akka-stream" % akkaV
-  )
-}
-
 //libraryDependencies ++= Seq(
 //  "com.typesafe" % "config" % "1.3.4"
 //)
@@ -64,6 +57,10 @@ libraryDependencies ++= Seq(
   "org.jaudiolibs" % "audioservers-api" % "1.2.0",
   "org.jaudiolibs" % "audioservers-javasound" % "1.2.0",
   "org.jaudiolibs" % "audioservers-jack" % "1.2.0"
+)
+
+libraryDependencies ++= Seq(
+  "xyz.hyperreal" %% "texish" % "0.1.3"
 )
 
 coverageExcludedPackages := ".*Main"
