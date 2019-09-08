@@ -14,5 +14,4 @@ package object symfonia {
   implicit val materializer = ActorMaterializer()
   implicit val ec = system.dispatcher
 
-
 }

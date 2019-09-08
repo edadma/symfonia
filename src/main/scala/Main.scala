@@ -49,6 +49,7 @@ object Main extends App {
 //  Player( Shape.length( Oscillator.sinWave(440), 6 ).throttle( 44100, 1 second ) ).join
 //  system.terminate
 
-  //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
+  //  Player( Source.tick(Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play Oscillator.sinWave(440), 6 ).throttle( 44100, 1 second ) ).join
+  // (Duration(1, SECONDS), Duration(1, SECONDS), 1d).take(5)).play
 
 }

@@ -6,24 +6,23 @@ import java.util.logging.Level
 import java.util.logging.Logger
 import java.util.{List => JList}
 
-import scala.collection.mutable
-import scala.concurrent.Await
-import scala.concurrent.duration.Duration
-import scala.jdk.CollectionConverters._
-
-import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.stream.OverflowStrategy
-import akka.stream.scaladsl.{Sink, Source}
-import akka.testkit.TestProbe
 
+import scala.jdk.CollectionConverters._
+import akka.stream.scaladsl.{Sink, Source}
 import org.jaudiolibs.audioservers.AudioClient
 import org.jaudiolibs.audioservers.AudioConfiguration
 import org.jaudiolibs.audioservers.AudioServerProvider
 import org.jaudiolibs.audioservers.ext.ClientID
 import org.jaudiolibs.audioservers.ext.Connections
 
+import scala.collection.mutable
+import scala.concurrent.Await
+import scala.concurrent.duration.Duration
 
-object Player {
+
+
+object PlayerOld {
 
   lazy val loader = ServiceLoader.load(classOf[AudioServerProvider])
 
@@ -42,25 +41,13 @@ object Player {
       case None => sys.error( "jack not found" )
     }
 
-  def apply( src: Source[Double, _] ) = new PlayerClient( src )
+  def apply( src: Source[Double, _] ) = {
+    new PlayerClient( src )
+  }
 
   class PlayerClient( src: Source[Double, _] ) extends AudioClient {
-    abstract class AckingReceiverMessage
-    case object Ack extends AckingReceiverMessage
-    case object StreamInitialized extends AckingReceiverMessage
-    case object StreamCompleted extends AckingReceiverMessage
-    case class StreamFailure( ex: Throwable ) extends AckingReceiverMessage
-
-    val probe = TestProbe()
-    val receiver = system.actorOf(Props(new AckingReceiver(probe.ref, ackWith = Ack)))
-    val sink = Sink.actorRefWithAck(
-      receiver,
-      onInitMessage = StreamInitialized,
-      ackMessage = Ack,
-      onCompleteMessage = StreamCompleted,
-      onFailureMessage = StreamFailure )
+    val sink = src map (_.toFloat) grouped 1024 buffer (1, OverflowStrategy.backpressure) runWith Sink.queue[Seq[Float]]
     val data = new mutable.Queue[Float]( 1024 )
-    val sink = src map (_.toFloat) grouped 1024 buffer (1, OverflowStrategy.backpressure) runWith sink
     val config = new AudioConfiguration(
       44100.0f, //sample rate
       0, // input channels
@@ -133,24 +120,6 @@ object Player {
 
     def shutdown = {
 
-    }
-
-    class AckingReceiver(probe: ActorRef, ackWith: Any) extends Actor with ActorLogging {
-      def receive: Receive = {
-        case StreamInitialized =>
-          log.info("Stream initialized!")
-          sender ! Ack
-          data.clear
-        case el: String =>
-          log.info("Received element: {}", el)
-          probe ! el
-          sender ! Ack // ack to allow the stream to proceed sending more elements
-        case StreamCompleted =>
-          log.info("Stream completed!")
-          context.system.terminate
-        case StreamFailure(ex) =>
-          log.error(ex, "Stream failed!")
-      }
     }
   }
 
