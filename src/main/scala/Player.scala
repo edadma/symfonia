@@ -39,7 +39,7 @@ object Player {
   lazy val provider =
     findProvider match {
       case Some( p ) => p
-      case None => sys.error( "jack not found" )
+      case None => sys.error( "jack audio not found" )
     }
 
   def apply( src: Source[Double, _] ) = new PlayerClient( src )
@@ -60,7 +60,9 @@ object Player {
       onCompleteMessage = StreamCompleted,
       onFailureMessage = StreamFailure )
     val data = new mutable.Queue[Float]( 1024 )
-    val sink = src map (_.toFloat) grouped 1024 buffer (1, OverflowStrategy.backpressure) runWith sink
+
+    src map (_.toFloat) grouped 1024 buffer (1, OverflowStrategy.backpressure) runWith sink
+
     val config = new AudioConfiguration(
       44100.0f, //sample rate
       0, // input channels
@@ -69,9 +71,7 @@ object Player {
       // extensions
       new ClientID("Symfonia"),
       Connections.OUTPUT)
-
     val server = provider.createServer( config, this )
-
     val runner = new Thread( new Runnable {
       def run = {
         try {
@@ -95,12 +95,7 @@ object Player {
         sys.error( "only work with stereo output" )
     }
 
-    var done = false
-
     def process( time: Long, inputs: JList[FloatBuffer], outputs: JList[FloatBuffer], nframes: Int ): Boolean = {
-      if (done)
-        return false
-
       val left = outputs.get(0)
       val right = outputs.get(1)
 
@@ -108,22 +103,21 @@ object Player {
         buffer = new Array[Float]( nframes )
       }
 
-      val dequeued = data.length min nframes
+      var idx = 0
 
-      for (i <- 0 until dequeued)
-        buffer(i) = data.dequeue
+      while (idx < nframes) {
+        while (data isEmpty)
+          Thread.`yield`
 
-      if (dequeued < nframes)
-        Await.result( sink.pull, Duration.Inf ) match {
-          case Some( s ) =>
-            for (i <- dequeued until nframes)
-              buffer(i) = s(i - dequeued)
+        val dequeued = data.length min (nframes - idx)
 
-            for (i <- nframes - dequeued until s.length)
-              data enqueue s(i)
-          case None =>
-            done = true
+        synchronized {
+          for (i <- idx until dequeued + idx)
+            buffer(i) = data.dequeue
         }
+
+        idx += dequeued
+      }
 
       left.put(buffer)
       right.put(buffer)
@@ -141,10 +135,10 @@ object Player {
           log.info("Stream initialized!")
           sender ! Ack
           data.clear
-        case el: String =>
-          log.info("Received element: {}", el)
-          probe ! el
-          sender ! Ack // ack to allow the stream to proceed sending more elements
+        case elem: Seq[_] =>
+          log.info("Received element of size: {}", elem.size)
+          sender ! Ack
+          data.enqueueAll( elem.asInstanceOf[Seq[Float]] )
         case StreamCompleted =>
           log.info("Stream completed!")
           context.system.terminate
