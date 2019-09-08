@@ -10,6 +10,7 @@ import scala.collection.mutable
 import scala.concurrent.Await
 import scala.concurrent.duration.Duration
 import scala.jdk.CollectionConverters._
+import scala.concurrent.duration._
 
 import akka.actor.{Actor, ActorLogging, ActorRef, Props}
 import akka.stream.OverflowStrategy
@@ -83,7 +84,7 @@ object Player {
       }
     } )
 
-    runner.setPriority( Thread.MAX_PRIORITY )
+//    runner.setPriority( Thread.MAX_PRIORITY )
     runner.start
 
     var buffer: Array[Float] = _
@@ -129,15 +130,19 @@ object Player {
 
     }
 
-    class AckingReceiver(probe: ActorRef, ackWith: Any) extends Actor with ActorLogging {
+    class AckingReceiver( probe: ActorRef, ackWith: Any ) extends Actor with ActorLogging {
       def receive: Receive = {
         case StreamInitialized =>
-          log.info("Stream initialized!")
+//          log.info("Stream initialized!")
           sender ! Ack
           data.clear
         case elem: Seq[_] =>
-          log.info("Received element of size: {}", elem.size)
-          sender ! Ack
+//          log.info("Received element of size: {}", elem.size)
+          if (data.length + elem.length < 2048)
+            sender ! Ack
+          else
+            system.scheduler.scheduleOnce( (data.length + elem.length - 1024)/Symfonia.rate.toDouble seconds, sender, Ack)
+
           data.enqueueAll( elem.asInstanceOf[Seq[Float]] )
         case StreamCompleted =>
           log.info("Stream completed!")
